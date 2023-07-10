@@ -1,26 +1,14 @@
 import { promises as fs } from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
-import dotenv from 'dotenv'
 import { Migrator, FileMigrationProvider, NO_MIGRATIONS } from 'kysely'
-import { Kysely } from 'kysely'
-import { PlanetScaleDialect } from 'kysely-planetscale'
-import { User } from '../src/models/user.model'
+import { getConfig } from '../src/config/config.js'
+import { getDBClient } from '../src/config/database.js'
 
-dotenv.config()
 const __filename = fileURLToPath(import.meta.url)
 
-interface Database {
-  user: User
-}
-
-const db = new Kysely<Database>({
-  dialect: new PlanetScaleDialect({
-    username: process.env.DATABASE_USERNAME,
-    password: process.env.DATABASE_PASSWORD,
-    host: process.env.DATABASE_HOST
-  })
-})
+const config = getConfig()
+const db = getDBClient(config.database)
 
 const migrator = new Migrator({
   db,
