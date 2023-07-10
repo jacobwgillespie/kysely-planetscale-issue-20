@@ -11,7 +11,7 @@ to not be released when an error occurs inside a transaction.
 2. Set up `.env` file by renaming `.env.example` to `.env` and filling it out with your fresh
    planetscale db connection details
 
-3. Run migrations `npm run migrate`
+3. Run migrations `npm run migrate:latest` (if you want to revert to `npm run migrate:none`)
 
 4. Run the test to reproduce the issue `npm run reproduce`
 
