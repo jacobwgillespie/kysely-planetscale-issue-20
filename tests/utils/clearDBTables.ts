@@ -2,7 +2,7 @@ import { TableReference } from 'kysely/dist/cjs/parser/table-parser.js'
 import { Config } from '../../src/config/config'
 import { getDBClient, Database } from '../../src/config/database'
 
-const clearDBTables = (
+export const clearDBTables = (
   tables: Array<TableReference<Database>>,
   databaseConfig: Config['database']
 ) => {
@@ -13,5 +13,3 @@ const clearDBTables = (
     }
   })
 }
-
-export { clearDBTables }
