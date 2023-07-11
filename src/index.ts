@@ -1,5 +1,5 @@
+import { connect } from '@planetscale/database'
 import { getConfig } from './config/config'
-import { getDBClient } from './config/database'
 
 export const reproduce = async (
   name: string,
@@ -8,31 +8,21 @@ export const reproduce = async (
   providerUserId: string
 ) => {
   const config = getConfig()
-  const client = getDBClient(config.database)
+  const conn = connect(config.database)
   try {
-    await client.transaction().execute(async (trx) => {
-      const userId = await trx
-        .insertInto('user')
-        .values({
-          name: name,
-          email: email,
-          is_email_verified: true,
-          password: null,
-          role: 'user'
-        })
-        .executeTakeFirstOrThrow()
-      await trx
-        .insertInto('authorisations')
-        .values({
-          user_id: Number(userId.insertId),
-          provider_type: providerType,
-          provider_user_id: providerUserId
-        })
-        .executeTakeFirstOrThrow()
+    await conn.transaction(async (trx) => {
+      const userId = await trx.execute(
+        'insert into `user` (`name`, `email`, `is_email_verified`, `password`, `role`) values (?, ?, ?, ?, ?)',
+        [name, email, true, null, 'user']
+      )
+      await trx.execute(
+        'insert into `authorisations` (`user_id`, `provider_type`, `provider_user_id`) values (?, ?, ?)',
+        [Number(userId.insertId), providerType, providerUserId]
+      )
       return userId
     })
   } catch (error) {
-    await client.deleteFrom('user').where('user.email', '=', email).execute()
+    await conn.execute('delete from `user` where `user`.`email` = ?', [email])
     throw new Error('User already exists!')
   }
 }
